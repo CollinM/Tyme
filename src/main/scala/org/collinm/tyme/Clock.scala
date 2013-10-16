@@ -20,9 +20,31 @@ import org.collinm.tyme.utils.Time
 object Clock extends SwingApplication {
     
     def startup(args: Array[String]) = {
-        val frame = new ClockFrame()
+        // Parse command line arguments
+        val argMap = parseArgs(args)
+        val size = if (argMap.contains("sizeX")) (argMap("sizeX").toInt, argMap("sizeY").toInt)
+        		   else (-1, -1)
+        
+        // Create Clock!
+        val frame = new ClockFrame(size._1, size._2)
         frame.visible = true
         //frame.peer.setUndecorated(true)  // Remove title bar
+    }
+    
+    /** Parse command line arguments.
+     *  
+     * @return Map of arguments
+     */
+    def parseArgs(args: Array[String]) = {
+        def getSize(args: Array[String], vals: Map[String, String]): Map[String, String] = {
+            val index = if (args.contains("-s")) args.indexOf("-s")
+            			else if (args.contains("--size")) args.indexOf("--size")
+            			else -1
+            if (index < 0) vals
+            else vals + (("sizeX", args(index+1)), ("sizeY", args(index+2)))
+        }
+        
+        getSize(args, Map[String,String]())
     }
 }
 
@@ -32,9 +54,17 @@ object Clock extends SwingApplication {
  *  itself on creation and instantiates a clock that fits nicely inside the frame
  *  (centered).
  */
-class ClockFrame extends MainFrame {
-    this.maximize()
-    val clock = new ElegantClockPanel(this.toolkit.getScreenSize())
+class ClockFrame(x: Int, y: Int) extends MainFrame {
+    if (x > 0 && y > 0) this.preferredSize = new Dimension(x, y)
+    else {
+        this.preferredSize = this.toolkit.getScreenSize()
+        this.peer.setUndecorated(true)
+        this.peer.setAlwaysOnTop(true)
+    }
+    
+    
+    
+    val clock = new ElegantClockPanel(this.preferredSize)
     val timer = new ClockTimer(30)
     
     listenTo(timer)
@@ -44,6 +74,13 @@ class ClockFrame extends MainFrame {
     
     contents = clock
     timer.start()
+    
+    /** Last method to be called upon exit */
+    override def closeOperation(): Unit = {
+        timer.stop()
+        this.dispose()
+        sys.exit(0)
+    }
 }
 
 /** The Panel component that draws the clock.
@@ -135,9 +172,9 @@ class ElegantClockPanel(dimension: Dimension) extends BoxPanel(Orientation.Horiz
  */
 class ClockTimer(fps: Int) extends Publisher {
     val delay = 1000/fps
-    // Custom action to that fires our desired event, so we can use a Swing Timer
+    // Custom action that fires our desired event, so we can use a Swing Timer
     val timeout = new javax.swing.AbstractAction() { def actionPerformed(e: java.awt.event.ActionEvent) = publish(RedrawTime()) }
-    val timer = new javax.swing.Timer(delay, timeout)  // Fire "timeout" ever "delay" milliseconds
+    val timer = new javax.swing.Timer(delay, timeout)  // Fire "timeout" every "delay" milliseconds
     timer.setRepeats(true)
     
     def start() = timer.start()
