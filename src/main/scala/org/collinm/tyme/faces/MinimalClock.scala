@@ -69,6 +69,11 @@ class MinimalClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal
         val timeStrX = xOffset + (diameter*0.5) - (g.getFontMetrics().stringWidth(timeStr) * 0.5)
         g.drawString(timeStr, timeStrX.toFloat, (yOffset+(diameter*0.75)).toFloat)
         
+        // Draw date text
+        val dateStr = Time.getDateString()
+        val dateStrX = xOffset + (diameter*0.5) - (g.getFontMetrics().stringWidth(dateStr) * 0.5)
+        g.drawString(dateStr, dateStrX.toFloat, (yOffset+(diameter*0.33)).toFloat)
+        
         // Draw hands
         val (hours, minutes, seconds, milliseconds) = Time.getTime()
         // seconds
