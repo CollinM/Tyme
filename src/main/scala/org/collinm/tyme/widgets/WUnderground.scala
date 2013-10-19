@@ -29,7 +29,7 @@ class WeatherUnderground(key: String, location: String) {
                              
         val forecastJson = getJson(forecastUrl)
         var forecastMap = Map[String, String]()
-        forecastMap = forecastMap + ("" -> compact(render()))
+        //forecastMap = forecastMap + ("" -> compact(render()))
     }
 }
 
