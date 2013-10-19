@@ -12,14 +12,13 @@ import java.awt.RenderingHints
 import org.collinm.tyme.utils.{Time, Geometry, ClockTimer, RedrawTime}
 import java.awt.Font
 
-/** The Panel component that draws the clock.
+/** Draw a relatively minimalist clock.
  *  
  *  @param dimension
  *      The area the clock should fit in (with a border)
  */
 class MinimalClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal) {
-    // Variables to enable occasional repainted of the clock face
-    var lastStaticPaintSec = 0.0
+    
     // Minimum dimension will always be height after the window is maximized
     // Figure out the basic measurements of the clock: diameter and border size for X and Y axis
     val yOffset = dimension.getHeight() * 0.05
@@ -39,18 +38,22 @@ class MinimalClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal
     val majorTicks = Range(1, 13).map(hr => getLineTick(hr/12.0, origin, (diameter/2)*0.95, majorTickLength))
     val minorTicks = Range(1, 61).map(min => getLineTick(min/60.0, origin, (diameter/2)*0.95, minorTickLength))
     
-    // Instantiate the Strokes used to draw the hands
-    background = Color.black
+    // Instantiate strokes
+    val ringStroke = new BasicStroke(10)
+    val majorTickStroke = new BasicStroke(5)
+    val minorTickStroke = new BasicStroke(2)
     val minHrStroke = new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)
     val secStroke = new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)
     
     // Instantiate Colors
+    background = Color.black
     val clockColor = Color.LIGHT_GRAY
     val secondColor = Color.RED
     val textColor = new Color(20, 20, 20)
     
     // Instantiate font
     val timeFont = new Font("SansSerif", Font.PLAIN, (diameter*0.125).toInt)
+    
     
     override def paintComponent(g: Graphics2D): Unit = {
         // Rendering hints for anti-aliasing
@@ -71,26 +74,23 @@ class MinimalClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal
         // seconds
         g.setColor(secondColor)
         g.setStroke(secStroke)
-        g.draw( getHand(seconds/60, origin, (diameter/2)*0.8) )
+        g.draw( getHand(seconds/60, origin, (diameter/2)*0.8, 0) )
         // hour, minute
         g.setColor(clockColor)
         g.setStroke(minHrStroke)
-        g.draw( getHand(hours/12, origin, (diameter/2)*0.4) )
-        g.draw( getHand(minutes/60, origin, (diameter/2)*0.6472) )
+        g.draw( getHand(hours/12, origin, diameter*0.2, diameter*0.05) )
+        g.draw( getHand(minutes/60, origin, diameter*0.3236, diameter*0.05) )
         
-        // repaint clock face ever second
-        if (seconds > lastStaticPaintSec+1 || seconds < 1) {
-            g.setColor(clockColor)
-            // Draw edge of clock
-        	g.setStroke(new BasicStroke(10))
-        	g.draw(outline)
-        	
-        	// Draw ticks
-        	g.setStroke(new BasicStroke(5))
-        	majorTicks.map(tick => g.draw(tick))
-        	g.setStroke(new BasicStroke(2))
-        	minorTicks.map(tick => g.draw(tick))
-        }
+        // repaint clock face
+        // Draw edge of clock
+    	g.setStroke(ringStroke)
+    	g.draw(outline)
+    	
+    	// Draw ticks
+    	g.setStroke(majorTickStroke)
+    	majorTicks.map(tick => g.draw(tick))
+    	g.setStroke(minorTickStroke)
+    	minorTicks.map(tick => g.draw(tick))
     }
     
     /** Get a clock hand (line).
@@ -102,10 +102,13 @@ class MinimalClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal
      *  	2-tuple for the center of the clock
      *  @param length
      *  	how long the hand should be
+     *  @param overhang
+     *      the length of the hand overhang, the portion on the opposite side of the origin
      *  @return A Line2D for the clock hand
      */
-    def getHand(percent: Double, origin: (Double, Double), length: Double) = {
-        val point = Geometry.getPointOnCircle(percent, origin, length)
-        new Line2D.Double(origin._1, origin._2, point._1, point._2)
+    def getHand(percent: Double, origin: (Double, Double), length: Double, overhang: Double) = {
+        val clockPoint = Geometry.getPointOnCircle(percent, origin, length)
+        val overPoint = Geometry.getPointOnCircle(percent+0.5, origin, overhang)
+        new Line2D.Double(overPoint._1, overPoint._2, clockPoint._1, clockPoint._2)
     }
 }

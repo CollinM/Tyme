@@ -36,7 +36,7 @@ object Clock extends SwingApplication {
             val index = if (args.contains("-r")) args.indexOf("-r")
             			else if (args.contains("--refresh")) args.indexOf("--refresh")
             			else -1
-            if (index < 0) vals + (("refresh", "30"))
+            if (index < 0) vals + (("refresh", "24"))
             else vals + (("refresh", args(index+1)))
         }
         
