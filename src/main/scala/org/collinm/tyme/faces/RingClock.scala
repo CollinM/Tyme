@@ -48,6 +48,18 @@ class RingClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal)  
     // Instantiate font
     val timeFont = new Font("SansSerif", Font.PLAIN, (diameter*0.125).toInt)
     
+    // Hand histories
+    var lastHour: (Array[Int], Array[Int]) = (Array(0,0,0), Array(0,0,0))
+    var lastMin: (Array[Int], Array[Int]) = (Array(0,0,0), Array(0,0,0))
+    
+    def handsDifferent(hand1: (Array[Int], Array[Int]), hand2: (Array[Int], Array[Int])): Boolean = {
+        var flag = true
+        for (index <- Range(0, 3)) {
+            flag = flag && hand1._1(index) != hand2._1(index) && hand1._2(index) != hand2._2(index)
+        }
+        flag
+    }
+    
     override def paintComponent(g: Graphics2D): Unit = {
         // Rendering hints for anti-aliasing
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -68,18 +80,26 @@ class RingClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal)  
         // Draw hands
         val (hours, minutes, seconds, milliseconds) = Time.getTime()
         // hour
-        val (xHourPts, yHourPts) = Geometry.getEquilateralTrianglePoints(
+        val (xHour, yHour) = Geometry.getEquilateralTrianglePoints(
                 Geometry.getPointOnCircle(hours / 12, origin, radius - 15),
                 30.0, 
                 (hours / 12) * 360)
-        g.setColor(hourColor)
-        g.fillPolygon(xHourPts.map(d => d.toInt).toArray, yHourPts.map(d => d.toInt).toArray, 3)
+        val xHourPts = xHour.map(d => d.toInt).toArray
+        val yHourPts = yHour.map(d => d.toInt).toArray
+        if (handsDifferent(lastHour, (xHourPts, yHourPts))) {
+        	g.setColor(hourColor)
+        	g.fillPolygon(xHourPts, yHourPts, 3)
+        }
         // minute
-        val (xMinPts, yMinPts) = Geometry.getEquilateralTrianglePoints(
+        val (xMin, yMin) = Geometry.getEquilateralTrianglePoints(
                 Geometry.getPointOnCircle(minutes / 60, origin, radius - 15),
                 30.0, 
                 (minutes / 60) * 360)
-        g.setColor(minColor)
-        g.fillPolygon(xMinPts.map(d => d.toInt).toArray, yMinPts.map(d => d.toInt).toArray, 3)
+        val xMinPts = xMin.map(d => d.toInt).toArray
+        val yMinPts = yMin.map(d => d.toInt).toArray
+        if (handsDifferent(lastMin, (xMinPts, yMinPts))) {
+        	g.setColor(minColor)
+        	g.fillPolygon(xMinPts, yMinPts, 3)
+        }
     }
 }

@@ -15,7 +15,7 @@ object Clock extends SwingApplication {
         // Parse command line arguments
         val argMap = parseArgs(args)
         val size = (argMap("sizeX").toInt, argMap("sizeY").toInt)
-        val refreshRate = argMap("refresh").toInt
+        val refreshRate = argMap("refresh").toDouble
         
         // Create Clock
         val frame = new ClockFrame(size._1, size._2, refreshRate, argMap("face"))
@@ -64,7 +64,7 @@ object Clock extends SwingApplication {
  *  itself on creation and instantiates a clock that fits nicely inside the frame
  *  (centered).
  */
-class ClockFrame(x: Int, y: Int, refreshRate: Int, face: String) extends MainFrame {
+class ClockFrame(x: Int, y: Int, refreshRate: Double, face: String) extends MainFrame {
     // Set clock dimensions
     if (x > 0 && y > 0) this.preferredSize = new Dimension(x, y)
     else {

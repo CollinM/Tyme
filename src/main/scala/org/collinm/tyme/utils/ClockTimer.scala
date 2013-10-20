@@ -11,8 +11,8 @@ import scala.swing.event.Event
  *  @param fps
  *  	target frames per second (refresh rate)
  */
-class ClockTimer(fps: Int) extends Publisher {
-    val delay = 1000/fps
+class ClockTimer(fps: Double) extends Publisher {
+    val delay = (1000 / fps).toInt
     // Custom action that fires our desired event, so we can use a Swing Timer
     val timeout = new javax.swing.AbstractAction() { def actionPerformed(e: java.awt.event.ActionEvent) = publish(RedrawTime()) }
     val timer = new javax.swing.Timer(delay, timeout)  // Fire "timeout" every "delay" milliseconds
