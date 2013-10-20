@@ -52,6 +52,9 @@ class RingClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal)  
     var lastHour: (Array[Int], Array[Int]) = (Array(0,0,0), Array(0,0,0))
     var lastMin: (Array[Int], Array[Int]) = (Array(0,0,0), Array(0,0,0))
     
+    /** Compare hands for complete difference in points.  Returns true iff all 
+     *  the points of both arrays are different.
+     */
     def handsDifferent(hand1: (Array[Int], Array[Int]), hand2: (Array[Int], Array[Int])): Boolean = {
         var flag = true
         for (index <- Range(0, 3)) {
@@ -86,6 +89,7 @@ class RingClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal)  
                 (hours / 12) * 360)
         val xHourPts = xHour.map(d => d.toInt).toArray
         val yHourPts = yHour.map(d => d.toInt).toArray
+        // Only redraw if the hands are completely different
         if (handsDifferent(lastHour, (xHourPts, yHourPts))) {
         	g.setColor(hourColor)
         	g.fillPolygon(xHourPts, yHourPts, 3)
@@ -97,6 +101,7 @@ class RingClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal)  
                 (minutes / 60) * 360)
         val xMinPts = xMin.map(d => d.toInt).toArray
         val yMinPts = yMin.map(d => d.toInt).toArray
+        // Only redraw if the hands are completely different
         if (handsDifferent(lastMin, (xMinPts, yMinPts))) {
         	g.setColor(minColor)
         	g.fillPolygon(xMinPts, yMinPts, 3)

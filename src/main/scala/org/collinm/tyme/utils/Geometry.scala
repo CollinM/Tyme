@@ -4,6 +4,17 @@ import scala.math.{Pi, cos, sin}
 
 object Geometry {
     
+    /** Calculates a point in space on an imaginary circle.
+     *  
+     *  @param percent
+     *  	how far around the circle the point is, e.g. 0% = 12 o'clock, 25% = 3 o'clock
+     *  @param origin
+     *  	the origin of the circle
+     *  @param radius
+     *  	the radius of the circle
+     *   
+     *  @return an (x,y) point tuple of Double's
+     */
 	def getPointOnCircle(percent: Double, origin: (Double, Double), radius: Double): (Double, Double) = {
 	    val radians = (percent * 2*Pi) - Pi/2
 	    (origin._1 + (radius * cos(radians)), origin._2 + radius * sin(radians))

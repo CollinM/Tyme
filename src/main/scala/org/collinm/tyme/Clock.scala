@@ -25,7 +25,7 @@ object Clock extends SwingApplication {
     /** Parse command line arguments.
      *  
      *  Get the requested size of the window, default = maximize the window.
-     *  Get the refresh rate (fps), default = 24
+     *  Get the refresh rate (frames per second), default = 24
      *  Get the clock face, default = "minimal"
      *  
      * @return Map of arguments
@@ -79,7 +79,6 @@ class ClockFrame(x: Int, y: Int, refreshRate: Double, face: String) extends Main
         case "ring" => new RingClock(this.preferredSize)
         case _ => new MinimalClock(this.preferredSize)
     }
-        
     val timer = new ClockTimer(refreshRate)
     
     listenTo(timer)
