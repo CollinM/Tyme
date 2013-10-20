@@ -3,8 +3,10 @@ package org.collinm.tyme
 import scala.swing.SwingApplication
 import scala.swing.MainFrame
 import java.awt.Dimension
+import scala.swing.Component
 import org.collinm.tyme.utils.{ClockTimer, RedrawTime}
-import org.collinm.tyme.faces.MinimalClock
+import org.collinm.tyme.faces.{MinimalClock, RingClock}
+
 
 /** Main runtime */
 object Clock extends SwingApplication {
@@ -16,11 +18,15 @@ object Clock extends SwingApplication {
         val refreshRate = argMap("refresh").toInt
         
         // Create Clock
-        val frame = new ClockFrame(size._1, size._2, refreshRate)
+        val frame = new ClockFrame(size._1, size._2, refreshRate, argMap("face"))
         frame.visible = true
     }
     
     /** Parse command line arguments.
+     *  
+     *  Get the requested size of the window, default = maximize the window.
+     *  Get the refresh rate (fps), default = 24
+     *  Get the clock face, default = "minimal"
      *  
      * @return Map of arguments
      */
@@ -39,9 +45,16 @@ object Clock extends SwingApplication {
             if (index < 0) vals + (("refresh", "24"))
             else vals + (("refresh", args(index+1)))
         }
+        def getClockFace(args: Array[String], vals: Map[String, String]): Map[String, String] = {
+            val index = if (args.contains("-f")) args.indexOf("-f")
+            			else if (args.contains("--face")) args.indexOf("--face")
+            			else -1
+            val face = if (index < 0) "minimal"
+            		   else args(index+1)
+            vals + (("face", face))
+        }
         
-        var results = getSize(args, Map[String,String]())
-        getRefresh(args, results)
+        List(getSize _, getRefresh _, getClockFace _).foldLeft(Map[String, String]())((argVals, func) => func(args, argVals))
     }
 }
 
@@ -51,15 +64,22 @@ object Clock extends SwingApplication {
  *  itself on creation and instantiates a clock that fits nicely inside the frame
  *  (centered).
  */
-class ClockFrame(x: Int, y: Int, refreshRate: Int) extends MainFrame {
+class ClockFrame(x: Int, y: Int, refreshRate: Int, face: String) extends MainFrame {
+    // Set clock dimensions
     if (x > 0 && y > 0) this.preferredSize = new Dimension(x, y)
     else {
         this.preferredSize = this.toolkit.getScreenSize()
         this.peer.setUndecorated(true)
         this.peer.setAlwaysOnTop(true)
     }
-    
-    val clock = new MinimalClock(this.preferredSize)
+
+    // Start clock + timer
+    val clock: Component = face match {
+        case "minimal" => new MinimalClock(this.preferredSize)
+        case "ring" => new RingClock(this.preferredSize)
+        case _ => new MinimalClock(this.preferredSize)
+    }
+        
     val timer = new ClockTimer(refreshRate)
     
     listenTo(timer)
