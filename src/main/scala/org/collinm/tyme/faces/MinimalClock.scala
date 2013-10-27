@@ -23,26 +23,27 @@ class MinimalClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal
     // Figure out the basic measurements of the clock: diameter and border size for X and Y axis
     val yOffset = dimension.getHeight() * 0.05
     val diameter = dimension.getHeight() * 0.9
+    val radius = diameter / 2
     val xOffset = (dimension.getWidth() - diameter) / 2
     
     // Create the edge of the clock and the hour and minute ticks
     val outline = new Ellipse2D.Double(xOffset, yOffset, diameter, diameter)
-    val origin = (xOffset + diameter/2, yOffset + diameter/2)
+    val origin = (xOffset + radius, yOffset + radius)
     def getLineTick(percent: Double, origin: (Double, Double), distFromOrigin: Double, length: Double) = {
         val (x0, y0) = Geometry.getPointOnCircle(percent, origin, distFromOrigin)
         val (x1, y1) = Geometry.getPointOnCircle(percent, origin, distFromOrigin-length)
         new Line2D.Double(x0, y0, x1, y1)
     }
-    val majorTickLength = 10
-    val minorTickLength = 4
-    val majorTicks = Range(1, 13).map(hr => getLineTick(hr/12.0, origin, (diameter/2)*0.95, majorTickLength))
-    val minorTicks = Range(1, 61).map(min => getLineTick(min/60.0, origin, (diameter/2)*0.95, minorTickLength))
+    val majorTickLength = 30
+    val minorTickLength = 10
+    val majorTicks = Range(1, 13).map(hr => getLineTick(hr/12.0, origin, radius*0.95, majorTickLength))
+    val minorTicks = Range(1, 61).map(min => getLineTick(min/60.0, origin, radius*0.95, minorTickLength))
     
     // Instantiate strokes
     val ringStroke = new BasicStroke(10)
-    val majorTickStroke = new BasicStroke(5)
-    val minorTickStroke = new BasicStroke(2)
-    val minHrStroke = new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)
+    val majorTickStroke = new BasicStroke(15)
+    val minorTickStroke = new BasicStroke(5)
+    val minHrStroke = new BasicStroke(15, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)
     val secStroke = new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)
     
     // Instantiate Colors
@@ -62,6 +63,18 @@ class MinimalClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
         super.paintComponent(g)
         
+        // repaint clock face
+        // Draw edge of clock
+        g.setColor(clockColor)
+    	g.setStroke(ringStroke)
+    	g.draw(outline)
+    	
+    	// Draw ticks
+    	g.setStroke(majorTickStroke)
+    	majorTicks.map(tick => g.draw(tick))
+    	g.setStroke(minorTickStroke)
+    	minorTicks.map(tick => g.draw(tick))
+        
         // Draw time text
         g.setColor(textColor)
         g.setFont(timeFont)
@@ -79,23 +92,12 @@ class MinimalClock(dimension: Dimension) extends BoxPanel(Orientation.Horizontal
         // seconds
         g.setColor(secondColor)
         g.setStroke(secStroke)
-        g.draw( getHand(seconds/60, origin, (diameter/2)*0.8, 0) )
+        g.draw( getHand(seconds/60, origin, radius*0.9, 0) )
         // hour, minute
         g.setColor(clockColor)
         g.setStroke(minHrStroke)
-        g.draw( getHand(hours/12, origin, diameter*0.2, diameter*0.05) )
-        g.draw( getHand(minutes/60, origin, diameter*0.3236, diameter*0.05) )
-        
-        // repaint clock face
-        // Draw edge of clock
-    	g.setStroke(ringStroke)
-    	g.draw(outline)
-    	
-    	// Draw ticks
-    	g.setStroke(majorTickStroke)
-    	majorTicks.map(tick => g.draw(tick))
-    	g.setStroke(minorTickStroke)
-    	minorTicks.map(tick => g.draw(tick))
+        g.draw( getHand(hours/12, origin, radius*0.5, diameter*0.05) )
+        g.draw( getHand(minutes/60, origin, radius*0.8, diameter*0.05) )
     }
     
     /** Get a clock hand (line).
